@@ -1,0 +1,22 @@
+{
+  "name": "acf/portfolio-grid",
+  "title": "Portfolio Grid",
+  "description": "A responsive interlocking portfolio grid with customizable cards",
+  "category": "layout",
+  "icon": "grid-view",
+  "keywords": ["portfolio", "grid", "cards"],
+  "supports": {
+    "align": ["wide", "full"],
+    "anchor": true
+  },
+  "script": "file:./script.js",
+  "example": {
+    "attributes": {
+      "mode": "preview"
+    }
+  },
+  "acf": {
+    "mode": "edit",
+    "renderCallback": "stout_render_portfolio_grid_block"
+  }
+}

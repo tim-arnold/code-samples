@@ -1,0 +1,268 @@
+name: 💾 Staging Workers & DB Backup
+
+on:
+  workflow_dispatch: # Manual trigger for testing
+    inputs:
+      reason:
+        description: 'Reason for staging backup'
+        required: false
+        default: 'manual-test'
+        type: string
+
+permissions:
+  contents: write
+  
+jobs:
+  backup-staging:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Install Wrangler CLI
+        run: npm install -g wrangler
+      
+      - name: Create backup directory
+        run: |
+          mkdir -p backup/staging-cloudflare
+          cd backup/staging-cloudflare
+      
+      - name: Backup Worker source code
+        run: |
+          echo "📦 Backing up Staging Worker source code..."
+          
+          # Create worker source backup
+          tar -czf backup/staging-cloudflare/worker-source.tar.gz workers/
+          
+          # Copy configuration files
+          cp wrangler.staging-new.toml backup/staging-cloudflare/
+          cp schema.sql backup/staging-cloudflare/
+          
+          # Copy migration files
+          if [ -d "migrations" ]; then
+            tar -czf backup/staging-cloudflare/migrations.tar.gz migrations/
+          fi
+      
+      - name: Backup D1 database schema
+        run: |
+          echo "🗄️ Backing up Staging D1 database schema..."
+          cd backup/staging-cloudflare
+          
+          # Export current schema
+          wrangler d1 execute librarycard-db-staging-new --config=wrangler.staging-new.toml --env=staging --remote --command=".schema" > database-schema-backup.sql || echo "Schema backup failed"
+          
+          # Get table info for verification
+          wrangler d1 execute librarycard-db-staging-new --config=wrangler.staging-new.toml --env=staging --remote --command="SELECT name FROM sqlite_master WHERE type='table';" > tables-list.txt || echo "Tables list failed"
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN_STAGING_NEW }}
+      
+      - name: Backup D1 database data
+        run: |
+          echo "💾 Backing up Staging D1 database data..."
+
+          BACKUP_REASON="${{ github.event.inputs.reason || 'github-actions-scheduled' }}"
+          node scripts/backup-staging.js create "$BACKUP_REASON"
+
+          # Copy backup files to the workflow archive directory
+          cp -r backups-staging/* backup/staging-cloudflare/ 2>/dev/null || true
+
+          # Find the latest backup JSON and copy as the expected filename
+          LATEST_BACKUP=$(ls -t backups-staging/staging-backup-*.json 2>/dev/null | head -1)
+          if [ -n "$LATEST_BACKUP" ]; then
+            cp "$LATEST_BACKUP" backup/staging-cloudflare/staging-database-backup.json
+          fi
+
+          # Get row counts for verification
+          echo "📊 Getting database statistics..."
+          cat > backup/staging-cloudflare/database-stats.txt << EOF
+          Staging Database Statistics - $(date -u)
+          ========================================
+
+          EOF
+
+          wrangler d1 execute librarycard-db-staging-new --config=wrangler.staging-new.toml --env=staging --remote --command="SELECT 'users' as table_name, COUNT(*) as row_count FROM users UNION ALL SELECT 'locations', COUNT(*) FROM locations UNION ALL SELECT 'shelves', COUNT(*) FROM shelves UNION ALL SELECT 'books', COUNT(*) FROM books UNION ALL SELECT 'location_members', COUNT(*) FROM location_members;" >> backup/staging-cloudflare/database-stats.txt || echo "Row count query failed" >> backup/staging-cloudflare/database-stats.txt
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN_STAGING_NEW }}
+      
+      - name: Get Worker deployment info
+        run: |
+          echo "⚙️ Getting Staging Worker deployment information..."
+          cd backup/staging-cloudflare
+          
+          # Try to get worker info
+          wrangler whoami > worker-auth-info.txt || echo "Auth info failed"
+          
+          # Get deployment info using modern wrangler commands
+          echo "Checking staging worker deployment status..." > deployment-status.txt
+          wrangler deployments list --name=librarycard-worker-staging >> deployment-status.txt || echo "Deployments check failed" >> deployment-status.txt
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN_STAGING_NEW }}
+      
+      - name: Create backup metadata
+        run: |
+          cd backup/staging-cloudflare
+          
+          cat > backup-metadata.json << EOF
+          {
+            "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+            "backup_type": "staging-automated",
+            "environment": "staging-new",
+            "commit_sha": "${{ github.sha }}",
+            "commit_message": "$(git log -1 --pretty=%B | tr '\n' ' ')",
+            "branch": "${{ github.ref_name }}",
+            "reason": "${{ github.event.inputs.reason }}",
+            "worker_source_files": [
+              "worker-source.tar.gz",
+              "wrangler.staging-new.toml",
+              "schema.sql"
+            ],
+            "database_files": [
+              "database-schema-backup.sql",
+              "tables-list.txt",
+              "database-stats.txt",
+              "staging-database-backup.json"
+            ],
+            "scripts": [
+              "backup-staging-data.js"
+            ]
+          }
+          EOF
+          
+          # Create restoration guide for staging
+          cat > RESTORE-STAGING.md << 'EOF'
+          # Staging Cloudflare Workers & D1 Restoration Guide
+          
+          ## Worker Restoration
+          
+          ### 1. Extract Worker Source
+          \`\`\`bash
+          tar -xzf worker-source.tar.gz
+          \`\`\`
+          
+          ### 2. Deploy Worker
+          \`\`\`bash
+          # Install dependencies
+          npm install
+          
+          # Authenticate with Cloudflare (staging account)
+          wrangler auth login
+          
+          # Deploy worker to staging
+          cd workers
+          wrangler deploy --config=../wrangler.staging-new.toml --env=staging
+          \`\`\`
+          
+          ## D1 Database Restoration
+          
+          ### 1. Use Comprehensive Backup Data
+          The \`staging-database-backup.json\` file contains complete table schemas and data.
+          
+          ### 2. Restore Using GitHub Actions
+          Use the "Staging Database Restore" workflow with this backup ID.
+          
+          ### 3. Manual Restoration (if needed)
+          \`\`\`bash
+          # Apply schema
+          wrangler d1 execute librarycard-db-staging-new --config=wrangler.staging-new.toml --env=staging --file=schema.sql
+          
+          # Use the staging restore script with the backup JSON
+          node scripts/restore-staging.js
+          \`\`\`
+          
+          ## Environment Configuration
+          
+          ### Required Secrets
+          - \`CLOUDFLARE_API_TOKEN_STAGING_NEW\` with Workers and D1 permissions
+          
+          ### Verification Steps
+          1. Worker deploys successfully to staging
+          2. Database schema matches original
+          3. API endpoints respond correctly
+          4. Frontend can connect to restored worker
+          5. Test data integrity with spot checks
+          
+          ## Testing Notes
+          - This is STAGING - safe for testing restore procedures
+          - Use this to validate restore processes before production
+          - Test both automated and manual restore methods
+          - Verify backup/restore cycle completeness
+          EOF
+      
+      - name: Create archive
+        run: |
+          cd backup
+          tar -czf staging-cloudflare-backup-$(date +%Y%m%d-%H%M).tar.gz staging-cloudflare/
+      
+      - name: Set release variables
+        run: |
+          echo "RELEASE_DATE=$(date +%Y%m%d-%H%M)" >> $GITHUB_ENV
+          echo "RELEASE_DATE_READABLE=$(date '+%Y-%m-%d %H:%M UTC')" >> $GITHUB_ENV
+          echo "BACKUP_DATE=$(date -u)" >> $GITHUB_ENV
+      
+      - name: Upload backup to GitHub Releases
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: staging-backup-${{ github.run_number }}-${{ env.RELEASE_DATE }}
+          name: "Staging Backup - ${{ env.RELEASE_DATE_READABLE }}"
+          body: |
+            ## Automated Staging Cloudflare Workers & D1 Backup
+            
+            **Backup Date:** ${{ env.BACKUP_DATE }}
+            **Environment:** Staging (staging-new)
+            **Commit:** ${{ github.sha }}
+            **Reason:** ${{ github.event.inputs.reason }}
+            **Type:** Workers + D1 Database (Complete)
+            
+            ### Contents:
+            - 🔧 Complete Worker source code
+            - 🗄️ Database schema backup
+            - 📊 Database statistics and table info
+            - 💾 **Complete database backup with all data**
+            - 📋 Configuration files (wrangler.staging-new.toml, schema.sql)
+            - 🔄 Migration files
+            - 📖 Staging restoration guide
+            
+            ### Restore Instructions:
+            1. Download and extract the backup archive
+            2. Follow RESTORE-STAGING.md for detailed steps
+            3. Use GitHub Actions "Staging Database Restore" workflow
+            4. Or use `staging-database-backup.json` with local restore scripts
+            
+            **This backup includes complete data restoration capabilities for testing!**
+            
+            ### Test with this backup:
+            - Validate GitHub Actions restore workflow
+            - Test manual restore procedures
+            - Verify backup/restore cycle before production use
+          files: |
+            backup/staging-cloudflare-backup-*.tar.gz
+          draft: false
+          prerelease: true
+      
+      - name: Notify on success
+        run: |
+          echo "✅ Staging backup completed successfully!"
+          echo "🎯 Ready to test restore workflows with this backup"
+          echo "📦 Backup stored in GitHub Releases with tag: staging-backup-${{ github.run_number }}-${{ env.RELEASE_DATE }}"
+      
+      - name: Notify on failure
+        if: failure()
+        run: |
+          echo "❌ Staging backup failed!"
+          echo "Check workflow logs and verify:"
+          echo "1. CLOUDFLARE_API_TOKEN_STAGING_NEW secret is set"
+          echo "2. Token has Workers and D1 permissions"
+          echo "3. Database name matches wrangler.staging-new.toml"
+          echo "4. Staging environment is accessible"

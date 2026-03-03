@@ -1,0 +1,21 @@
+{
+  "name": "acf/portfolio-companies",
+  "title": "Simple Logo Grid",
+  "description": "A simple grid of company logos with optional links and hover descriptions",
+  "category": "layout",
+  "icon": "grid-view",
+  "keywords": ["portfolio", "companies", "grid", "logo"],
+  "supports": {
+    "align": ["wide", "full"],
+    "anchor": true
+  },
+  "example": {
+    "attributes": {
+      "mode": "preview"
+    }
+  },
+  "acf": {
+    "mode": "edit",
+    "renderCallback": "stout_render_portfolio_companies_block"
+  }
+}

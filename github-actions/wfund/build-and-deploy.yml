@@ -1,0 +1,157 @@
+name: Build and Deploy
+
+on:
+  push:
+    branches: [ main, staging ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    name: Build Theme
+    defaults:
+      run:
+        working-directory: wp-content/themes/stout
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+        cache-dependency-path: 'wp-content/themes/stout/package.json'
+
+    - name: Install dependencies
+      run: npm install
+
+    - name: Build SCSS
+      run: npm run build
+
+    - name: Verify build artifacts
+      run: |
+        if [ -f "assets/css/style.css" ]; then
+          echo "SCSS compiled successfully"
+          ls -la assets/css/
+        else
+          echo "SCSS compilation failed"
+          exit 1
+        fi
+
+  deploy-staging:
+    runs-on: ubuntu-latest
+    name: Deploy to Staging
+    needs: build
+    if: github.ref == 'refs/heads/staging' && github.event_name == 'push'
+    environment: staging
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+        cache-dependency-path: 'wp-content/themes/stout/package.json'
+
+    - name: Build SCSS
+      working-directory: wp-content/themes/stout
+      run: |
+        npm install
+        npm run build
+
+    - name: Deploy theme via SFTP
+      uses: pressidium/lftp-mirror-action@v1
+      with:
+        host: ${{ secrets.STAGING_SFTP_HOST }}
+        port: 22
+        user: ${{ secrets.STAGING_SFTP_USER }}
+        pass: ${{ secrets.STAGING_SFTP_PASSWORD }}
+        onlyNewer: true
+        settings: 'sftp:auto-confirm yes'
+        localDir: './wp-content/themes/stout/'
+        remoteDir: './wp-content/themes/stout/'
+        reverse: true
+        options: '--verbose --exclude-glob=*.log --exclude-glob=*.tmp --exclude-glob=node_modules/ --exclude-glob=src/ --exclude-glob=package.json --exclude-glob=package-lock.json --exclude-glob=*.md --exclude-glob=.git*'
+
+    - name: Deploy custom plugin via SFTP
+      uses: pressidium/lftp-mirror-action@v1
+      with:
+        host: ${{ secrets.STAGING_SFTP_HOST }}
+        port: 22
+        user: ${{ secrets.STAGING_SFTP_USER }}
+        pass: ${{ secrets.STAGING_SFTP_PASSWORD }}
+        onlyNewer: true
+        settings: 'sftp:auto-confirm yes'
+        localDir: './wp-content/plugins/wfund-global-ctas/'
+        remoteDir: './wp-content/plugins/wfund-global-ctas/'
+        reverse: true
+        options: '--verbose --exclude-glob=*.log --exclude-glob=*.tmp --exclude-glob=.git*'
+
+    - name: Deployment summary
+      run: |
+        echo "Theme deployed to: /wp-content/themes/stout/"
+        echo "Plugin deployed to: /wp-content/plugins/wfund-global-ctas/"
+
+  deploy-production:
+    runs-on: ubuntu-latest
+    name: Deploy to Production
+    needs: build
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    environment: production
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+        cache-dependency-path: 'wp-content/themes/stout/package.json'
+
+    - name: Build SCSS
+      working-directory: wp-content/themes/stout
+      run: |
+        npm install
+        npm run build
+
+    - name: Deploy theme via SFTP
+      uses: pressidium/lftp-mirror-action@v1
+      with:
+        host: ${{ secrets.PRODUCTION_SFTP_HOST }}
+        port: 22
+        user: ${{ secrets.PRODUCTION_SFTP_USER }}
+        pass: ${{ secrets.PRODUCTION_SFTP_PASSWORD }}
+        onlyNewer: true
+        settings: 'sftp:auto-confirm yes'
+        localDir: './wp-content/themes/stout/'
+        remoteDir: './wp-content/themes/stout/'
+        reverse: true
+        options: '--verbose --exclude-glob=*.log --exclude-glob=*.tmp --exclude-glob=node_modules/ --exclude-glob=src/ --exclude-glob=package.json --exclude-glob=package-lock.json --exclude-glob=*.md --exclude-glob=.git*'
+
+    - name: Deploy custom plugin via SFTP
+      uses: pressidium/lftp-mirror-action@v1
+      with:
+        host: ${{ secrets.PRODUCTION_SFTP_HOST }}
+        port: 22
+        user: ${{ secrets.PRODUCTION_SFTP_USER }}
+        pass: ${{ secrets.PRODUCTION_SFTP_PASSWORD }}
+        onlyNewer: true
+        settings: 'sftp:auto-confirm yes'
+        localDir: './wp-content/plugins/wfund-global-ctas/'
+        remoteDir: './wp-content/plugins/wfund-global-ctas/'
+        reverse: true
+        options: '--verbose --exclude-glob=*.log --exclude-glob=*.tmp --exclude-glob=.git*'
+
+    - name: Deployment summary
+      run: |
+        echo "Theme deployed to: /wp-content/themes/stout/"
+        echo "Plugin deployed to: /wp-content/plugins/wfund-global-ctas/"
