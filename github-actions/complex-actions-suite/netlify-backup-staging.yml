@@ -36,7 +36,7 @@ jobs:
       - name: Build frontend for staging
         run: npm run build
         env:
-          NEXT_PUBLIC_API_URL: https://librarycard-api-staging.librarycard-staging.workers.dev
+          NEXT_PUBLIC_API_URL: https://myapp-api-staging.example.workers.dev
       
       - name: Create backup metadata
         run: |
@@ -80,11 +80,11 @@ jobs:
           echo "- npm: $(npm --version)" >> backup/deployment-info.md
           echo "" >> backup/deployment-info.md
           echo "## Staging Environment Variables" >> backup/deployment-info.md
-          echo "- \`NEXT_PUBLIC_API_URL\`: https://librarycard-api-staging.librarycard-staging.workers.dev" >> backup/deployment-info.md
+          echo "- \`NEXT_PUBLIC_API_URL\`: https://myapp-api-staging.example.workers.dev" >> backup/deployment-info.md
           echo "" >> backup/deployment-info.md
           echo "## Staging URLs" >> backup/deployment-info.md
-          echo "- **Frontend:** https://staging--libarycard.netlify.app" >> backup/deployment-info.md
-          echo "- **API:** https://librarycard-api-staging.librarycard-staging.workers.dev" >> backup/deployment-info.md
+          echo "- **Frontend:** https://staging--myapp.netlify.app" >> backup/deployment-info.md
+          echo "- **API:** https://myapp-api-staging.example.workers.dev" >> backup/deployment-info.md
       
       - name: Archive build artifacts
         run: |
@@ -125,8 +125,8 @@ jobs:
             - 📋 Staging deployment metadata and instructions
             
             ### Staging Environment:
-            - **Frontend URL:** https://staging--libarycard.netlify.app
-            - **API URL:** https://librarycard-api-staging.librarycard-staging.workers.dev
+            - **Frontend URL:** https://staging--myapp.netlify.app
+            - **API URL:** https://myapp-api-staging.example.workers.dev
             
             ### Restore Instructions:
             1. Download and extract `source-code.tar.gz`

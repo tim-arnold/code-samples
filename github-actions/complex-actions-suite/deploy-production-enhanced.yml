@@ -109,8 +109,8 @@ jobs:
           echo "🔍 Verifying staging environment health..."
           
           # Check if staging is accessible and responsive
-          STAGING_URL="https://staging--libarycard.netlify.app"
-          STAGING_API_URL="https://librarycard-api-staging.librarycard-staging.workers.dev"
+          STAGING_URL="https://staging--myapp.netlify.app"
+          STAGING_API_URL="https://myapp-api-staging.example.workers.dev"
           
           # Test frontend
           if curl -f -s --max-time 10 "$STAGING_URL" > /dev/null; then
@@ -255,7 +255,7 @@ jobs:
           sleep 10  # Wait for propagation
           
           # Test production health endpoint
-          PROD_API_URL="https://librarycard-api-production.tim-arnold.workers.dev"
+          PROD_API_URL="https://myapp-api.example.workers.dev"
           if curl -f -s --max-time 15 "$PROD_API_URL/health" > /dev/null; then
             echo "✅ Production API deployment verified"
           else
@@ -311,7 +311,7 @@ jobs:
           # Enhanced health check with longer timeout for stability
           echo "🔍 Verifying production API health after migration..."
           sleep 15
-          PROD_API_URL="https://librarycard-api-production.tim-arnold.workers.dev"
+          PROD_API_URL="https://myapp-api.example.workers.dev"
           if curl -f -s --max-time 30 "$PROD_API_URL/health" > /dev/null; then
             echo "✅ Production API is healthy after migration"
           else
@@ -367,7 +367,7 @@ jobs:
             echo "✅ Complete full deployment sequence"
             echo ""
             echo "Netlify build hook: ${{ secrets.NETLIFY_PROD_BUILD_HOOK != '' && '***configured***' || '❌ NOT CONFIGURED' }}"
-            echo "Production frontend: https://librarycard.tim52.io"
+            echo "Production frontend: https://myapp.example.com"
             echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
             echo "🔍 DRY RUN COMPLETE - No actual deployment triggered"
           else
@@ -412,12 +412,12 @@ jobs:
         run: |
           if [[ "${{ github.event.inputs.migration_dry_run }}" == "true" ]]; then
             echo "🔍 DRY RUN MODE - Simulating frontend verification"
-            echo "In actual deployment, would verify https://librarycard.tim52.io is accessible"
+            echo "In actual deployment, would verify https://myapp.example.com is accessible"
             echo "✅ DRY RUN: Frontend verification would succeed"
           else
             echo "🔍 Verifying production frontend deployment..."
             
-            PROD_FRONTEND="https://librarycard.tim52.io"
+            PROD_FRONTEND="https://myapp.example.com"
             MAX_RETRIES=5
             RETRY_COUNT=0
             
@@ -483,7 +483,7 @@ jobs:
             echo "❌ NOT run database migrations"
             echo ""
             echo "Netlify build hook: ${{ secrets.NETLIFY_PROD_BUILD_HOOK != '' && '***configured***' || '❌ NOT CONFIGURED' }}"
-            echo "Production frontend: https://librarycard.tim52.io"
+            echo "Production frontend: https://myapp.example.com"
             echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
             echo "🔍 DRY RUN COMPLETE - No actual deployment triggered"
           else
@@ -526,12 +526,12 @@ jobs:
         run: |
           if [[ "${{ github.event.inputs.migration_dry_run }}" == "true" ]]; then
             echo "🔍 DRY RUN MODE - Simulating frontend verification"
-            echo "In actual deployment, would verify https://librarycard.tim52.io is accessible"
+            echo "In actual deployment, would verify https://myapp.example.com is accessible"
             echo "✅ DRY RUN: Frontend verification would succeed"
           else
             echo "🔍 Verifying production frontend deployment..."
             
-            PROD_FRONTEND="https://librarycard.tim52.io"
+            PROD_FRONTEND="https://myapp.example.com"
             MAX_RETRIES=5
             RETRY_COUNT=0
             
@@ -558,7 +558,7 @@ jobs:
         run: |
           echo "🎉 FRONTEND DEPLOYMENT COMPLETED SUCCESSFULLY"
           echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-          echo "Frontend URL: https://librarycard.tim52.io"
+          echo "Frontend URL: https://myapp.example.com"
           echo "Deployment type: frontend-only"
           echo "Completed at: $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
           echo "Deployed by: ${{ github.actor }}"
@@ -577,8 +577,8 @@ jobs:
         run: |
           echo "🔍 Running comprehensive production verification..."
           
-          PROD_FRONTEND="https://librarycard.tim52.io"
-          PROD_API="https://librarycard-api-production.tim-arnold.workers.dev"
+          PROD_FRONTEND="https://myapp.example.com"
+          PROD_API="https://myapp-api.example.workers.dev"
           
           # Test frontend
           if curl -f -s --max-time 15 "$PROD_FRONTEND" > /dev/null; then

@@ -121,7 +121,7 @@ jobs:
         run: |
           echo "🔍 Verifying staging API health after rollback..."
           sleep 10
-          STAGING_API_URL="https://librarycard-api-staging.librarycard-staging.workers.dev"
+          STAGING_API_URL="https://myapp-api-staging.example.workers.dev"
           if curl -f -s --max-time 30 "$STAGING_API_URL/health" > /dev/null; then
             echo "✅ Staging API is healthy after rollback"
           else
@@ -163,7 +163,7 @@ jobs:
           echo "💾 Creating production backup before rollback..."
           npm run backup:create
         env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN_PRODUCTION }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
 
       - name: Check rollback availability
         run: |
@@ -180,7 +180,7 @@ jobs:
           # Show current migration status
           npm run migrate:status
         env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN_PRODUCTION }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
 
       - name: Execute rollback on production
         run: |
@@ -195,13 +195,13 @@ jobs:
             npm run migrate:rollback:production
           fi
         env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN_PRODUCTION }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
 
       - name: Verify production health after rollback
         run: |
           echo "🔍 Verifying production API health after rollback..."
           sleep 15
-          PRODUCTION_API_URL="https://librarycard-api.librarycard.workers.dev"
+          PRODUCTION_API_URL="https://myapp-api.example.workers.dev"
           if curl -f -s --max-time 30 "$PRODUCTION_API_URL/health" > /dev/null; then
             echo "✅ Production API is healthy after rollback"
           else
@@ -216,7 +216,7 @@ jobs:
           export MIGRATION_ENV="production"
           npm run migrate:status
         env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN_PRODUCTION }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
 
       - name: Notify rollback completion
         run: |

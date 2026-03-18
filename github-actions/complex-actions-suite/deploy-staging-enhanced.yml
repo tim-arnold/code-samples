@@ -79,7 +79,7 @@ jobs:
           sleep 10  # Wait for propagation
           
           # Test staging health endpoint
-          STAGING_API_URL="https://librarycard-api-staging.librarycard-staging.workers.dev"
+          STAGING_API_URL="https://myapp-api-staging.example.workers.dev"
           if curl -f -s --max-time 15 "$STAGING_API_URL/health" > /dev/null; then
             echo "✅ Staging API deployment verified"
           else
@@ -158,7 +158,7 @@ jobs:
           # Enhanced health check after migration
           echo "🔍 Verifying staging API health after migration..."
           sleep 15
-          STAGING_API_URL="https://librarycard-api-staging.librarycard-staging.workers.dev"
+          STAGING_API_URL="https://myapp-api-staging.example.workers.dev"
           if curl -f -s --max-time 30 "$STAGING_API_URL/health" > /dev/null; then
             echo "✅ Staging API is healthy after migration"
           else
@@ -230,7 +230,7 @@ jobs:
       - name: Verify staging frontend deployment
         run: |
           echo "🔍 Verifying staging frontend deployment..."
-          STAGING_FRONTEND="https://librarycard-staging.tim52.io/"
+          STAGING_FRONTEND="https://staging.myapp.example.com/"
           MAX_RETRIES=5
           RETRY_COUNT=0
           
@@ -293,7 +293,7 @@ jobs:
       - name: Verify staging frontend deployment
         run: |
           echo "🔍 Verifying staging frontend deployment..."
-          STAGING_FRONTEND="https://librarycard-staging.tim52.io/"
+          STAGING_FRONTEND="https://staging.myapp.example.com/"
           
           if curl -f -s --max-time 15 "$STAGING_FRONTEND" > /dev/null; then
             echo "✅ Staging frontend deployment successful"
@@ -305,7 +305,7 @@ jobs:
       - name: Staging frontend deployment success
         run: |
           echo "🎉 STAGING FRONTEND DEPLOYMENT COMPLETED"
-          echo "Frontend URL: https://librarycard-staging.tim52.io/"
+          echo "Frontend URL: https://staging.myapp.example.com/"
           echo "Deployment type: frontend-only"
 
   staging-smoke-tests:
@@ -319,8 +319,8 @@ jobs:
         run: |
           echo "🧪 Running staging smoke tests..."
           
-          STAGING_FRONTEND="https://librarycard-staging.tim52.io/"
-          STAGING_API="https://librarycard-api-staging.librarycard-staging.workers.dev"
+          STAGING_FRONTEND="https://staging.myapp.example.com/"
+          STAGING_API="https://myapp-api-staging.example.workers.dev"
           
           # Test frontend accessibility
           if curl -f -s --max-time 15 "$STAGING_FRONTEND" > /dev/null; then

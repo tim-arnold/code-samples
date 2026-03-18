@@ -1,6 +1,6 @@
 # GitHub Actions Workflows
 
-CI/CD, backup, and disaster recovery workflows for LibraryCard.
+CI/CD, backup, and disaster recovery workflows.
 
 ## Deployment
 

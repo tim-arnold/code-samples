@@ -52,7 +52,7 @@ jobs:
         run: |
           echo "🔍 Verifying staging migration was applied successfully..."
           sleep 5
-          STAGING_API_URL="https://librarycard-api-staging.librarycard-staging.workers.dev"
+          STAGING_API_URL="https://myapp-api-staging.example.workers.dev"
           if curl -f -s --max-time 15 "$STAGING_API_URL/health" > /dev/null; then
             echo "✅ Staging database migration completed successfully"
           else
