@@ -1,4 +1,4 @@
-# W Fund Global CTAs
+# Global CTAs
 
 A WordPress plugin for managing global call-to-action sections with ACF fields.
 
@@ -19,7 +19,7 @@ A WordPress plugin for managing global call-to-action sections with ACF fields.
 
 ## Installation
 
-1. Upload plugin files to `/wp-content/plugins/wfund-global-ctas/`
+1. Upload plugin files to `/wp-content/plugins/global-ctas/`
 2. Activate the plugin through WordPress admin
 3. Navigate to **Global CTAs** in the admin sidebar to configure
 
@@ -38,7 +38,7 @@ A WordPress plugin for managing global call-to-action sections with ACF fields.
 
 ### Per-Page Visibility
 
-Individual pages and posts have `show_black_cta` and `show_red_cta` toggle fields, allowing editors to hide specific CTA color schemes on a per-page basis. Archive pages always display all enabled CTAs.
+Individual pages, posts, and custom post types have `show_black_cta` and `show_red_cta` toggle fields, allowing editors to hide specific CTA color schemes on a per-page basis. Archive pages always display all enabled CTAs.
 
 ## Customization
 
@@ -74,17 +74,17 @@ The plugin renders via the `primer_before_footer` hook. To reposition:
 
 ```php
 // Remove default placement
-remove_action( 'primer_before_footer', array( WFund_Global_CTAs::get_instance(), 'render_cta_sections' ) );
+remove_action( 'primer_before_footer', array( Global_CTAs::get_instance(), 'render_cta_sections' ) );
 
 // Add to custom location
-add_action( 'your_custom_hook', array( WFund_Global_CTAs::get_instance(), 'render_cta_sections' ) );
+add_action( 'your_custom_hook', array( Global_CTAs::get_instance(), 'render_cta_sections' ) );
 ```
 
 ## File Structure
 
 ```
-wfund-global-ctas/
-├── wfund-global-ctas.php      # Main plugin file (rendering, hooks)
+global-ctas/
+├── global-ctas.php            # Main plugin file (rendering, hooks)
 ├── includes/
 │   └── class-cta-fields.php   # ACF field registration and options page
 ├── acf-json/                  # ACF local JSON sync

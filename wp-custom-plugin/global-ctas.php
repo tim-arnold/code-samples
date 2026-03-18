@@ -1,13 +1,11 @@
 <?php
 /**
- * Plugin Name: W Fund Global CTAs
- * Plugin URI: https://wfund.com
- * Description: Manage global CTA sections with ACF fields for the W Fund website
+ * Plugin Name: Global CTAs
+ * Description: Manage global CTA sections with ACF fields
  * Version: 1.0.0
- * Author: W Fund
  * Requires PHP: 7.4
  * Requires at least: 5.0
- * Text Domain: wfund-global-ctas
+ * Text Domain: global-ctas
  * Domain Path: /languages
  */
 
@@ -17,15 +15,15 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // Define plugin constants
-define( 'WFUND_CTA_VERSION', '1.0.0' );
-define( 'WFUND_CTA_PLUGIN_FILE', __FILE__ );
-define( 'WFUND_CTA_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
-define( 'WFUND_CTA_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
+define( 'GLOBAL_CTA_VERSION', '1.0.0' );
+define( 'GLOBAL_CTA_PLUGIN_FILE', __FILE__ );
+define( 'GLOBAL_CTA_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
+define( 'GLOBAL_CTA_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
 
 /**
  * Main plugin class
  */
-class WFund_Global_CTAs {
+class Global_CTAs {
 
     /**
      * Single instance of the plugin
@@ -47,8 +45,8 @@ class WFund_Global_CTAs {
      */
     private function __construct() {
         add_action( 'plugins_loaded', array( $this, 'init' ) );
-        register_activation_hook( WFUND_CTA_PLUGIN_FILE, array( $this, 'activate' ) );
-        register_deactivation_hook( WFUND_CTA_PLUGIN_FILE, array( $this, 'deactivate' ) );
+        register_activation_hook( GLOBAL_CTA_PLUGIN_FILE, array( $this, 'activate' ) );
+        register_deactivation_hook( GLOBAL_CTA_PLUGIN_FILE, array( $this, 'deactivate' ) );
     }
 
     /**
@@ -69,7 +67,7 @@ class WFund_Global_CTAs {
      * Load plugin dependencies
      */
     private function load_dependencies() {
-        require_once WFUND_CTA_PLUGIN_DIR . 'includes/class-cta-fields.php';
+        require_once GLOBAL_CTA_PLUGIN_DIR . 'includes/class-cta-fields.php';
     }
 
     /**
@@ -77,7 +75,7 @@ class WFund_Global_CTAs {
      */
     private function setup_hooks() {
         // Initialize components
-        WFund_CTA_Fields::get_instance();
+        CTA_Fields::get_instance();
 
         // Add template functions
         add_action( 'primer_before_footer', array( $this, 'render_cta_sections' ) );
@@ -190,8 +188,8 @@ class WFund_Global_CTAs {
      */
     public function activate() {
         // Set default options if they don't exist
-        if ( ! get_option( 'wfund_cta_version' ) ) {
-            update_option( 'wfund_cta_version', WFUND_CTA_VERSION );
+        if ( ! get_option( 'global_cta_version' ) ) {
+            update_option( 'global_cta_version', GLOBAL_CTA_VERSION );
         }
     }
 
@@ -209,8 +207,8 @@ class WFund_Global_CTAs {
         ?>
         <div class="notice notice-error">
             <p>
-                <strong><?php esc_html_e( 'W Fund Global CTAs', 'wfund-global-ctas' ); ?></strong>
-                <?php esc_html_e( 'requires Advanced Custom Fields (ACF) to be installed and activated.', 'wfund-global-ctas' ); ?>
+                <strong><?php esc_html_e( 'Global CTAs', 'global-ctas' ); ?></strong>
+                <?php esc_html_e( 'requires Advanced Custom Fields (ACF) to be installed and activated.', 'global-ctas' ); ?>
             </p>
         </div>
         <?php
@@ -218,4 +216,4 @@ class WFund_Global_CTAs {
 }
 
 // Initialize plugin
-WFund_Global_CTAs::get_instance();
+Global_CTAs::get_instance();

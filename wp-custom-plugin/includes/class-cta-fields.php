@@ -3,7 +3,7 @@
 /**
  * Handle ACF field registration and management for CTAs
  */
-class WFund_CTA_Fields {
+class CTA_Fields {
 
     /**
      * Single instance
@@ -43,14 +43,14 @@ class WFund_CTA_Fields {
      * Set ACF JSON save path
      */
     public function acf_json_save_point( $path ) {
-        return WFUND_CTA_PLUGIN_DIR . 'acf-json';
+        return GLOBAL_CTA_PLUGIN_DIR . 'acf-json';
     }
 
     /**
      * Add plugin ACF JSON path to load paths
      */
     public function acf_json_load_point( $paths ) {
-        $paths[] = WFUND_CTA_PLUGIN_DIR . 'acf-json';
+        $paths[] = GLOBAL_CTA_PLUGIN_DIR . 'acf-json';
         return $paths;
     }
 
@@ -64,9 +64,9 @@ class WFund_CTA_Fields {
 
         // Add options page as top-level menu item
         acf_add_options_page( array(
-            'page_title'  => __( 'Global CTAs', 'wfund-global-ctas' ),
-            'menu_title'  => __( 'Global CTAs', 'wfund-global-ctas' ),
-            'menu_slug'   => 'wfund-global-ctas',
+            'page_title'  => __( 'Global CTAs', 'global-ctas' ),
+            'menu_title'  => __( 'Global CTAs', 'global-ctas' ),
+            'menu_slug'   => 'global-ctas',
             'capability'  => 'manage_options',
             'icon_url'    => 'dashicons-megaphone',
             'position'    => 30, // After Comments (25) and before Appearance (60)
@@ -81,7 +81,7 @@ class WFund_CTA_Fields {
      */
     private function register_cta_fields() {
         acf_add_local_field_group( array(
-            'key' => 'group_wfund_global_ctas',
+            'key' => 'group_global_ctas',
             'title' => 'Global CTAs',
             'fields' => array(
                 array(
@@ -136,7 +136,7 @@ class WFund_CTA_Fields {
                                 'id' => '',
                             ),
                             'default_value' => '',
-                            'placeholder' => 'e.g. Join the W Fund',
+                            'placeholder' => 'e.g. Get Started Today',
                             'prepend' => '',
                             'append' => '',
                             'maxlength' => 100,
@@ -275,7 +275,7 @@ class WFund_CTA_Fields {
                     array(
                         'param' => 'options_page',
                         'operator' => '==',
-                        'value' => 'wfund-global-ctas',
+                        'value' => 'global-ctas',
                     ),
                 ),
             ),

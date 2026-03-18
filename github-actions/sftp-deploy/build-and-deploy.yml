@@ -89,15 +89,15 @@ jobs:
         pass: ${{ secrets.STAGING_SFTP_PASSWORD }}
         onlyNewer: true
         settings: 'sftp:auto-confirm yes'
-        localDir: './wp-content/plugins/wfund-global-ctas/'
-        remoteDir: './wp-content/plugins/wfund-global-ctas/'
+        localDir: './wp-content/plugins/global-ctas/'
+        remoteDir: './wp-content/plugins/global-ctas/'
         reverse: true
         options: '--verbose --exclude-glob=*.log --exclude-glob=*.tmp --exclude-glob=.git*'
 
     - name: Deployment summary
       run: |
         echo "Theme deployed to: /wp-content/themes/stout/"
-        echo "Plugin deployed to: /wp-content/plugins/wfund-global-ctas/"
+        echo "Plugin deployed to: /wp-content/plugins/global-ctas/"
 
   deploy-production:
     runs-on: ubuntu-latest
@@ -146,12 +146,12 @@ jobs:
         pass: ${{ secrets.PRODUCTION_SFTP_PASSWORD }}
         onlyNewer: true
         settings: 'sftp:auto-confirm yes'
-        localDir: './wp-content/plugins/wfund-global-ctas/'
-        remoteDir: './wp-content/plugins/wfund-global-ctas/'
+        localDir: './wp-content/plugins/global-ctas/'
+        remoteDir: './wp-content/plugins/global-ctas/'
         reverse: true
         options: '--verbose --exclude-glob=*.log --exclude-glob=*.tmp --exclude-glob=.git*'
 
     - name: Deployment summary
       run: |
         echo "Theme deployed to: /wp-content/themes/stout/"
-        echo "Plugin deployed to: /wp-content/plugins/wfund-global-ctas/"
+        echo "Plugin deployed to: /wp-content/plugins/global-ctas/"

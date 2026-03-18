@@ -15,8 +15,6 @@ get_header(); ?>
 		// Get ACF fields
 		$position = get_field('position_title');
 		$subtitle_lines = get_field('subtitle_lines');
-		$hero_image = get_field('heroine_image');
-		$grid_image = get_field('grid_photo');
 		$email = get_field('email_address');
 		$social_links = get_field('social_links');
 		$team_category = get_field('team_category');
@@ -108,7 +106,7 @@ get_header(); ?>
 
                 <?php if ($subtitle_lines) : ?>
                     <div class="team-member-subtitles">
-                        <?php echo $subtitle_lines; // Already sanitized WYSIWYG content ?>
+                        <?php echo wp_kses_post( $subtitle_lines ); ?>
                     </div>
                 <?php endif; ?>
             </div>

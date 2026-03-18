@@ -8,7 +8,7 @@ Single workflow that handles building and deploying the WordPress theme and cust
 
 **Build** — Runs on all pushes to `main`/`staging` and PRs to `main`. Compiles SCSS and verifies the output CSS exists.
 
-**Deploy to Staging** — Runs after a successful build on the `staging` branch. Deploys the Stout theme and `wfund-global-ctas` plugin to the staging server via SFTP.
+**Deploy to Staging** — Runs after a successful build on the `staging` branch. Deploys the Stout theme and `global-ctas` plugin to the staging server via SFTP.
 
 **Deploy to Production** — Runs after a successful build on the `main` branch. Requires manual approval via GitHub's environment protection rules before deploying.
 
